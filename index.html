@@ -117,6 +117,7 @@ details summary{cursor:pointer;color:var(--blue);font-weight:600;min-height:44px
 
   <section class="card">
     <h2>Last pig farm in the past 7 days</h2>
+    <p class="hint" id="lastHint" hidden></p>
     <div class="chips" id="lastChips"></div>
     <div id="lastOther" hidden>
       <label class="f" for="lastName">Farm name</label>
@@ -215,7 +216,16 @@ function siteFromHash(){const h=location.hash.slice(1);const s=SITES.find(x=>slu
 
 /* Last pig farm */
 function daysAgo(t){const h=(Date.now()-t)/36e5;if(h<24)return DAYS[0];const d=Math.floor(h/24);return d<=7?DAYS[d]:null}
-function suggestion(){for(const l of store.log.slice().reverse()){if(Date.now()-l.t<30*60e3)continue;const d=daysAgo(l.t);return d?{name:l.site,days:d}:null}return null}
+function lastVisit(){return store.log.length?store.log[store.log.length-1]:null}
+function suggestion(){const l=lastVisit();if(!l)return null;const d=daysAgo(l.t);return d?{name:l.site,days:d}:null}
+/* Prefill from the last unit signed in to on this phone; staff change it if they have been elsewhere since */
+function prefillLast(){
+  const l=lastVisit(),sg=suggestion();st.days='';$('lastName').value='';
+  if(sg){st.last='sg';st.lastName=sg.name;st.days=sg.days;$('lastHint').textContent='Filled in from your last sign-in. Change it if you have been to another pig farm since.'}
+  else if(l){st.last='none';st.lastName='None';$('lastHint').textContent='Your last sign-in was '+l.site+', more than 7 days ago, so this is set to None. Change it if you have been to a pig farm since.'}
+  else{st.last=null;st.lastName='';$('lastHint').textContent=''}
+  $('lastHint').hidden=!l;
+}
 function renderLast(){
   const sg=suggestion();let h='';
   if(sg)h+=`<button class="chip" type="button" data-last="sg" aria-pressed="${st.last==='sg'}">${esc(sg.name)}, ${esc(sg.days.toLowerCase())}</button>`;
@@ -310,7 +320,7 @@ $('go').addEventListener('click',async()=>{
   $('ok').hidden=false;$('go').textContent='Sign in';
   renderHist();renderQueue();
 });
-$('okClose').onclick=()=>{$('ok').hidden=true;st.site='';st.last=null;st.lastName='';st.days='';st.cam='';st.a=Object.assign({},STD);st.confirm=false;$('confirm').checked=false;$('diff').open=false;
+$('okClose').onclick=()=>{$('ok').hidden=true;st.site='';prefillLast();st.cam='';st.a=Object.assign({},STD);st.confirm=false;$('confirm').checked=false;$('diff').open=false;
   for(const c of $('camSeg').children)c.setAttribute('aria-pressed',false);try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}
   renderSite();renderLast();renderDecl();update();window.scrollTo({top:0})};
 window.addEventListener('online',flush);
@@ -320,7 +330,7 @@ function renderHist(){
 }
 window.addEventListener('hashchange',()=>{siteFromHash();renderSite();update()});
 
-siteFromHash();showMe();renderSite();renderLast();renderDecl();renderHist();renderQueue();update();flush();
+siteFromHash();showMe();prefillLast();renderSite();renderLast();renderDecl();renderHist();renderQueue();update();flush();
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
 </script>
