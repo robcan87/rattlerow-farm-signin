@@ -1,5 +1,5 @@
 // Keeps the app opening when a farm has no signal. Pages load fresh when online.
-const CACHE = 'rr-farm-signin-v2';
+const CACHE = 'rr-farm-signin-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

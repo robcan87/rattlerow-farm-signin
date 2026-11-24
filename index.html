@@ -132,13 +132,6 @@ details summary{cursor:pointer;color:var(--blue);font-weight:600;min-height:44px
 
   <section class="card">
     <h2>Biosecurity</h2>
-    <div class="q">
-      <p>Cameras or recording devices with you?</p>
-      <div class="seg" id="camSeg">
-        <button class="chip" type="button" data-v="No">No</button>
-        <button class="chip" type="button" data-v="Yes">Yes, authorised by farm manager</button>
-      </div>
-    </div>
     <ul class="decl" id="decl"></ul>
     <details id="diff">
       <summary>Something is different today</summary>
@@ -184,8 +177,8 @@ let store={me:null,log:[],queue:[]};
 try{const raw=localStorage.getItem('rr-farm-signin');if(raw)store=Object.assign(store,JSON.parse(raw))}catch(e){}
 const save=()=>{try{localStorage.setItem('rr-farm-signin',JSON.stringify(store))}catch(e){}};
 
-const STD={id:'Yes',clothes:'Yes',symptoms:'No',abroad:'No',countries:'',stock:'No',species:'',loc:'',rules:'Yes'};
-const st={site:'',last:null,lastName:'',days:'',cam:'',a:Object.assign({},STD),confirm:false};
+const STD={id:'Yes',clothes:'Yes',cam:'No',camAuth:'',symptoms:'No',abroad:'No',countries:'',stock:'No',species:'',loc:'',rules:'Yes'};
+const st={site:'',last:null,lastName:'',days:'',a:Object.assign({},STD),confirm:false};
 
 /* Your details */
 function showMe(){
@@ -242,18 +235,19 @@ $('lastName').addEventListener('input',()=>{st.lastName=$('lastName').value.trim
 $('siteData').innerHTML=SITES.map(s=>`<option value="${esc(s)}">`).join('');
 
 /* Biosecurity */
-$('camSeg').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;st.cam=b.dataset.v;for(const c of $('camSeg').children)c.setAttribute('aria-pressed',c.dataset.v===st.cam);update()});
-const QS=[['id','Proof of ID provided'],['clothes','Changed into farm clothes or overalls'],['symptoms','Flu like symptoms, vomiting or diarrhoea'],['abroad','Abroad in the past 7 days'],['stock','Contact with other farmed livestock in the last 24 hours'],['rules','Read the farm Health and Safety Site Rules']];
+const QS=[['id','Proof of ID provided'],['clothes','Changed into farm clothes or overalls'],['cam','Cameras or recording devices with you'],['symptoms','Flu like symptoms, vomiting or diarrhoea'],['abroad','Abroad in the past 7 days'],['stock','Contact with other farmed livestock in the last 24 hours'],['rules','Read the farm Health and Safety Site Rules']];
+function dv(k){const a=st.a;let v=a[k];if(k==='abroad'&&v==='Yes')v=a.countries||'Yes';if(k==='stock'&&v==='Yes')v=a.species||'Yes';if(k==='cam'&&v==='Yes')v=a.camAuth==='Yes'?'Yes, authorised':'Yes';return v}
 function renderDecl(){
   const a=st.a;
-  $('decl').innerHTML=QS.map(([k,t])=>{let v=a[k];if(k==='abroad'&&v==='Yes')v=a.countries||'Yes';if(k==='stock'&&v==='Yes')v=a.species||'Yes';return`<li><span>${esc(t)}</span><span>${esc(v)}</span></li>`}).join('');
+  $('decl').innerHTML=QS.map(([k,t])=>`<li><span>${esc(t)}</span><span>${esc(dv(k))}</span></li>`).join('');
   $('diffQs').innerHTML=QS.map(([k,t])=>`<div class="q"><p>${esc(t)}?</p><div class="seg">${['Yes','No'].map(v=>`<button class="chip" type="button" data-q="${k}" data-v="${v}" aria-pressed="${a[k]===v}">${v}</button>`).join('')}</div>${
+    k==='cam'&&a.cam==='Yes'?`<p style="margin-top:10px">Authorised by the farm manager to take it on the unit?</p><div class="seg">${['Yes','No'].map(v=>`<button class="chip" type="button" data-q="camAuth" data-v="${v}" aria-pressed="${a.camAuth===v}">${v}</button>`).join('')}</div>`:''}${
     k==='abroad'&&a.abroad==='Yes'?`<label class="f" for="countries">Countries visited</label><input type="text" id="countries" value="${esc(a.countries)}">`:''}${
     k==='stock'&&a.stock==='Yes'?`<label class="f" for="species">Species</label><select id="species"><option value="">Choose</option>${SPECIES.map(s=>`<option${a.species===s?' selected':''}>${esc(s)}</option>`).join('')}</select><label class="f" for="loc">Where was the contact?</label><input type="text" id="loc" value="${esc(a.loc)}">`:''}</div>`).join('');
 }
-$('diffQs').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;st.a[b.dataset.q]=b.dataset.v;st.confirm=false;$('confirm').checked=false;renderDecl();update()});
+$('diffQs').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;st.a[b.dataset.q]=b.dataset.v;if(b.dataset.q==='cam'&&b.dataset.v==='No')st.a.camAuth='';st.confirm=false;$('confirm').checked=false;renderDecl();update()});
 $('diffQs').addEventListener('input',e=>{if(['countries','loc','species'].includes(e.target.id)){st.a[e.target.id]=e.target.value;const li=$('decl');renderDeclList();update()}});
-function renderDeclList(){const a=st.a;$('decl').innerHTML=QS.map(([k,t])=>{let v=a[k];if(k==='abroad'&&v==='Yes')v=a.countries||'Yes';if(k==='stock'&&v==='Yes')v=a.species||'Yes';return`<li><span>${esc(t)}</span><span>${esc(v)}</span></li>`}).join('')}
+function renderDeclList(){$('decl').innerHTML=QS.map(([k,t])=>`<li><span>${esc(t)}</span><span>${esc(dv(k))}</span></li>`).join('')}
 $('confirm').addEventListener('change',e=>{st.confirm=e.target.checked;update()});
 
 /* Build link */
@@ -262,8 +256,7 @@ function problems(){
   if(!m||!m.name)out.push('your name');if(!m||!m.reg)out.push('your vehicle reg');if(!m||!m.phone)out.push('your mobile number');
   if(!st.site)out.push('your farm');
   if(!st.last||(st.last==='other'&&(!st.lastName||!st.days)))out.push('your last pig farm');
-  if(!st.cam)out.push('the camera question');
-  const a=st.a;if(a.abroad==='Yes'&&!a.countries.trim())out.push('the countries visited');
+  const a=st.a;if(a.cam==='Yes'&&!a.camAuth)out.push('the camera authorisation');if(a.abroad==='Yes'&&!a.countries.trim())out.push('the countries visited');
   if(a.stock==='Yes'&&(!a.species||!a.loc.trim()))out.push('the livestock contact details');
   if(!st.confirm)out.push('the confirmation tick');
   return out;
@@ -273,6 +266,7 @@ function stops(){
   if(a.symptoms==='Yes')s.push('Entry is not permitted with flu like symptoms, vomiting or diarrhoea.');
   if(a.id==='No')s.push('Proof of ID is needed before entry.');
   if(a.clothes==='No')s.push('Change into the clothes or overalls provided by the farm before entry.');
+  if(a.cam==='Yes'&&a.camAuth==='No')s.push('Cameras and recording devices need the farm manager\'s authorisation before entry.');
   if(a.rules==='No')s.push('Read the farm Health and Safety Site Rules before entry.');
   return s;
 }
@@ -280,7 +274,7 @@ function answers(){
   const m=$('meForm').hidden?store.me:readMe(),a=st.a,p=new URLSearchParams();
   const add=(k,v)=>{if(v)p.append('entry.'+E[k],v)};
   add('site',st.site);add('name',m.name);add('id',a.id);add('phone',m.phone);add('org',m.org);add('reg',m.reg);add('clothes',a.clothes);
-  add('cam',st.cam);if(st.cam==='Yes')add('camAuth','Yes');add('symptoms',a.symptoms);
+  add('cam',a.cam);if(a.cam==='Yes')add('camAuth',a.camAuth);add('symptoms',a.symptoms);
   add('last',st.lastName||'None');if(st.lastName&&st.lastName!=='None')add('days',st.days);
   add('abroad',a.abroad==='Yes'?a.countries.trim():'No');add('stock',a.stock);
   if(a.stock==='Yes'){add('species',a.species);add('loc',a.loc.trim())}
@@ -320,8 +314,8 @@ $('go').addEventListener('click',async()=>{
   $('ok').hidden=false;$('go').textContent='Sign in';
   renderHist();renderQueue();
 });
-$('okClose').onclick=()=>{$('ok').hidden=true;st.site='';prefillLast();st.cam='';st.a=Object.assign({},STD);st.confirm=false;$('confirm').checked=false;$('diff').open=false;
-  for(const c of $('camSeg').children)c.setAttribute('aria-pressed',false);try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}
+$('okClose').onclick=()=>{$('ok').hidden=true;st.site='';prefillLast();st.a=Object.assign({},STD);st.confirm=false;$('confirm').checked=false;$('diff').open=false;
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}
   renderSite();renderLast();renderDecl();update();window.scrollTo({top:0})};
 window.addEventListener('online',flush);
 function renderHist(){
