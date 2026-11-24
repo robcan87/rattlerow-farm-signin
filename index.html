@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rattlerow Farm Sign-in</title>
+<meta name="theme-color" content="#1F4E79">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Farm Sign-in">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@700&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: plain, quick, practical, like a well made farm gate sign.
+IDEA: the visitor book at the unit door, turned into a one thumb form.
+PICTURE: the form itself, with the chosen farm shown large like a site board.
+COLOUR and TYPE: Rattlerow navy and blue on white, pale blue fields, orange only for warnings. Barlow.
+LAYOUT: one calm column, details remembered, sticky sign-in button at the bottom.
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#f4f8fc,#0c1824);--card:light-dark(#fff,#132536);--ink:light-dark(#10233a,#e8f0f8);
+--mute:light-dark(#5a6b7e,#9fb2c6);--navy:#1F4E79;--blue:light-dark(#2E75B6,#5fa3e0);
+--pale:light-dark(#e3eef9,#1b3550);--line:light-dark(#cfdcea,#26425f);--warn:#ED7D31;--warnbg:light-dark(#fdeee3,#3a2414)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+header{background:var(--navy);color:#fff;padding:22px max(5vw,16px) 26px}
+header h1{font:700 34px/1.05 "Barlow Semi Condensed",Barlow,sans-serif;margin:0;text-wrap:balance}
+header p{margin:4px 0 0;opacity:.85}
+main{max-width:560px;margin:0 auto;padding:16px 14px 150px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:19px;margin:0 0 10px;font-weight:700}
+.hint{color:var(--mute);font-size:14px;margin:6px 0 0}
+label.f{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
+input[type=text],input[type=tel],input[type=search],select{width:100%;font:inherit;font-size:17px;padding:11px 12px;min-height:48px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font:inherit;font-weight:600;min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--pale);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn{font:inherit;font-weight:600;min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--blue);background:transparent;color:var(--blue);cursor:pointer}
+.me{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.me b{display:block;font-size:19px}.me span{color:var(--mute)}
+.board{background:var(--navy);color:#fff;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.board strong{font:700 28px/1.1 "Barlow Semi Condensed",Barlow,sans-serif}
+.board button{background:transparent;color:#fff;border-color:#fff}
+.list{margin-top:8px;border:1px solid var(--line);border-radius:10px;overflow:hidden;max-height:300px;overflow-y:auto}
+.list button{display:block;width:100%;text-align:left;font:inherit;font-size:17px;min-height:46px;padding:10px 14px;border:0;border-bottom:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.list button:last-child{border-bottom:0}
+.decl{list-style:none;padding:0;margin:0}
+.decl li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.decl li span:last-child{font-weight:700;white-space:nowrap}
+.confirm{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px;border-radius:10px;background:var(--pale);font-weight:600;cursor:pointer}
+.confirm input{width:26px;height:26px;flex:none;accent-color:var(--navy);margin:0}
+.q{padding:10px 0;border-bottom:1px solid var(--line)}.q:last-child{border-bottom:0}
+.q p{margin:0 0 6px;font-weight:600}
+.seg{display:flex;gap:8px}.seg .chip{flex:1}
+.stop{background:var(--warnbg);border:2px solid var(--warn);border-radius:12px;padding:14px;font-weight:600;margin-bottom:14px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.bar div{max-width:560px;margin:0 auto}
+.go{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border:0;border-radius:12px;background:var(--navy);color:#fff;font:inherit;font-size:20px;font-weight:700;cursor:pointer}
+.go:disabled{background:var(--line);color:var(--mute);cursor:default}
+.bar p{margin:6px 0 0;font-size:14px;color:var(--mute);text-align:center}
+.bar a{color:var(--blue)}
+.queued{background:var(--warnbg);border:2px solid var(--warn);border-radius:12px;padding:14px;font-weight:600;margin-bottom:14px}
+.ok{position:fixed;inset:0;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:9}
+.ok svg{width:110px;height:110px;margin-bottom:16px}
+.ok h2{font:700 40px/1.05 "Barlow Semi Condensed",Barlow,sans-serif;margin:0 0 8px}
+.ok p{margin:2px 0;font-size:19px}
+.ok .small{font-size:15px;opacity:.8;margin-top:14px;max-width:420px}
+.ok button{margin-top:26px;background:#fff;color:var(--navy);border:0;min-width:200px}
+details summary{cursor:pointer;color:var(--blue);font-weight:600;min-height:44px;display:flex;align-items:center}
+.hist{font-size:14px;color:var(--mute);margin:0;padding-left:18px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.chip,.go{transition:background .15s}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Farm sign-in</h1>
+  <p>Rattlerow visitor book and biosecurity questionnaire</p>
+</header>
+<main>
+  <div class="queued" id="queued" hidden></div>
+
+  <section class="card" id="meCard">
+    <h2>Your details</h2>
+    <div id="meView" class="me" hidden>
+      <div><b id="meName"></b><span id="meSub"></span></div>
+      <button class="btn" id="meEdit" type="button">Change</button>
+    </div>
+    <div id="meForm">
+      <label class="f" for="fName">Full name</label>
+      <input type="text" id="fName" autocomplete="name">
+      <label class="f" for="fReg">Vehicle registration</label>
+      <input type="text" id="fReg" autocapitalize="characters" placeholder="e.g. AB12 CDE">
+      <label class="f" for="fPhone">Mobile number</label>
+      <input type="tel" id="fPhone" autocomplete="tel">
+      <label class="f" for="fOrg">Organisation</label>
+      <input type="text" id="fOrg" value="Rattlerow Farms">
+      <p class="hint">Saved on this phone so you only enter them once.</p>
+      <button class="btn" id="meSave" type="button" style="margin-top:10px">Save details</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Which farm are you at?</h2>
+    <div id="siteChosen" class="board" hidden><strong id="siteName"></strong><button class="btn" id="siteChange" type="button">Change</button></div>
+    <div id="sitePick">
+      <input type="search" id="siteSearch" placeholder="Start typing a farm name" aria-label="Search farms">
+      <div class="chips" id="siteRecent"></div>
+      <div class="list" id="siteList" hidden></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Last pig farm in the past 7 days</h2>
+    <div class="chips" id="lastChips"></div>
+    <div id="lastOther" hidden>
+      <label class="f" for="lastName">Farm name</label>
+      <input type="text" id="lastName" list="siteData" placeholder="Type or pick a farm">
+      <datalist id="siteData"></datalist>
+    </div>
+    <div id="daysWrap" hidden>
+      <label class="f">How long ago?</label>
+      <div class="chips" id="daysChips"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Biosecurity</h2>
+    <div class="q">
+      <p>Cameras or recording devices with you?</p>
+      <div class="seg" id="camSeg">
+        <button class="chip" type="button" data-v="No">No</button>
+        <button class="chip" type="button" data-v="Yes">Yes, authorised by farm manager</button>
+      </div>
+    </div>
+    <ul class="decl" id="decl"></ul>
+    <details id="diff">
+      <summary>Something is different today</summary>
+      <div id="diffQs"></div>
+    </details>
+    <label class="confirm"><input type="checkbox" id="confirm"><span>I confirm these answers are correct for today's visit</span></label>
+  </section>
+
+  <div class="stop" id="stop" hidden></div>
+
+  <section class="card" id="histCard" hidden>
+    <h2>Recent sign-ins on this phone</h2>
+    <ul class="hist" id="hist"></ul>
+  </section>
+</main>
+
+<div class="bar"><div>
+  <button class="go" id="go" type="button" disabled>Sign in</button>
+  <p id="need">Choose your farm to continue</p>
+</div></div>
+
+<div class="ok" id="ok" hidden role="dialog" aria-live="polite">
+  <svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="52" fill="#2E75B6"/><path d="M32 57l15 15 31-33" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2 id="okTitle">Signed in</h2>
+  <p id="okSite"></p>
+  <p id="okWho"></p>
+  <p class="small">Sent to the Rattlerow visitor book. Show this screen to the farm manager if asked.</p>
+  <button class="btn" id="okClose" type="button">Done</button>
+</div>
+
+<script>
+{
+const FORM='https://docs.google.com/forms/d/e/1FAIpQLSfvu_9gYiYaQoJ7HnVrp1LEHOxUEDoI1IOwL7vukCVw4Xlvhg/viewform';
+const E={site:'1014998138',name:'1597789384',id:'1018114267',phone:'504751076',org:'658022198',reg:'728927813',clothes:'156844217',cam:'67113677',camAuth:'1525271753',symptoms:'670660150',last:'1468525391',days:'917162195',abroad:'1287183535',stock:'1778712333',species:'2017364690',loc:'919063857',rules:'1376737799'};
+const SITES=["Abblitts Farm","Aberfeldy","Alderton","Barley Brigg","Barrow Clump","Bay Watch","Bells Farm","Bishops Castle","Bogower","Bridge House Farm","Broadoak","Broom Hill","Bullocks Hill","Bungalow","Bussocks","Chediston Hall","Church Farm","College Farm","Coneywood","Cranley Hall","Crown Farm, Sizewell","Dale Farm","Dunhill","Elmsett","Essex Farm","Fairway Farm","Far Heath, Bucklesham","Field Farm","First Furlong/Chatteris","Gate Farm","Grey Gables","Hall Farm","Hill Gate","Hill House","Hinderclay/Dunhill Rearing","Holly Tree","Hunstead Hall","Ixworth/Dale","Knapwell","Langrick","Lodge Farm","Long Meadow","Low Barn","Mair & Son","Mease Meadows","Mundford","Noah's Ark","Noshire","Park Farm","Pasture","Poplar Farm","Potters","Rife Cottage","Round Covert","Sandy","Schwiers, Street Farm","Seething","Shrubbery","Slate Hall","Springhall / Ivy","Sudbourne","Sutton Heath/Low Barn","Thorney","Town Farm","Waldringfield","Warstone Farm","Winch","Woodlands","Yew Tree Farm","Gorse Farm","Ash Corner"];
+const DAYS=["Last 24 Hours","1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days"];
+const SPECIES=["Cattle","Sheep","Goats","Horses","Avian (ducks, geese, hens, other bird species)","Mixed Species","Other"];
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+
+let store={me:null,log:[],queue:[]};
+try{const raw=localStorage.getItem('rr-farm-signin');if(raw)store=Object.assign(store,JSON.parse(raw))}catch(e){}
+const save=()=>{try{localStorage.setItem('rr-farm-signin',JSON.stringify(store))}catch(e){}};
+
+const STD={id:'Yes',clothes:'Yes',symptoms:'No',abroad:'No',countries:'',stock:'No',species:'',loc:'',rules:'Yes'};
+const st={site:'',last:null,lastName:'',days:'',cam:'',a:Object.assign({},STD),confirm:false};
+
+/* Your details */
+function showMe(){
+  const m=store.me;const ok=m&&m.name&&m.reg&&m.phone;
+  $('meView').hidden=!ok;$('meForm').hidden=!!ok;
+  if(ok){$('meName').textContent=m.name;$('meSub').textContent=m.reg+' · '+m.phone+' · '+m.org}
+  else if(m){$('fName').value=m.name||'';$('fReg').value=m.reg||'';$('fPhone').value=m.phone||'';$('fOrg').value=m.org||'Rattlerow Farms'}
+}
+function readMe(){return{name:$('fName').value.trim(),reg:$('fReg').value.trim().toUpperCase(),phone:$('fPhone').value.trim(),org:$('fOrg').value.trim()||'Rattlerow Farms'}}
+$('meSave').onclick=()=>{store.me=readMe();save();showMe();update()};
+$('meEdit').onclick=()=>{$('meView').hidden=true;$('meForm').hidden=false;const m=store.me;$('fName').value=m.name;$('fReg').value=m.reg;$('fPhone').value=m.phone;$('fOrg').value=m.org};
+['fName','fReg','fPhone','fOrg'].forEach(id=>$(id).addEventListener('input',update));
+
+/* Farm */
+function recentSites(){const seen=[];for(const l of store.log.slice().reverse()){if(!seen.includes(l.site))seen.push(l.site);if(seen.length===4)break}return seen}
+function renderSite(){
+  $('siteChosen').hidden=!st.site;$('sitePick').hidden=!!st.site;$('siteName').textContent=st.site;
+  $('siteRecent').innerHTML=recentSites().map(s=>`<button class="chip" type="button" data-site="${esc(s)}">${esc(s)}</button>`).join('');
+  const q=$('siteSearch').value.trim().toLowerCase();
+  const hits=q?SITES.filter(s=>s.toLowerCase().includes(q)):SITES;
+  $('siteList').hidden=false;
+  $('siteList').innerHTML=hits.length?hits.map(s=>`<button type="button" data-site="${esc(s)}">${esc(s)}</button>`).join(''):'<button type="button" disabled>No farm matches</button>';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-site]');if(!b)return;st.site=b.dataset.site;$('siteSearch').value='';try{history.replaceState(null,'','#'+slug(st.site))}catch(_){}renderSite();renderLast();update()});
+$('siteSearch').addEventListener('input',renderSite);
+$('siteChange').onclick=()=>{st.site='';renderSite();update();$('siteSearch').focus()};
+function siteFromHash(){const h=location.hash.slice(1);const s=SITES.find(x=>slug(x)===h);if(s)st.site=s}
+
+/* Last pig farm */
+function daysAgo(t){const h=(Date.now()-t)/36e5;if(h<24)return DAYS[0];const d=Math.floor(h/24);return d<=7?DAYS[d]:null}
+function suggestion(){for(const l of store.log.slice().reverse()){if(Date.now()-l.t<30*60e3)continue;const d=daysAgo(l.t);return d?{name:l.site,days:d}:null}return null}
+function renderLast(){
+  const sg=suggestion();let h='';
+  if(sg)h+=`<button class="chip" type="button" data-last="sg" aria-pressed="${st.last==='sg'}">${esc(sg.name)}, ${esc(sg.days.toLowerCase())}</button>`;
+  h+=`<button class="chip" type="button" data-last="none" aria-pressed="${st.last==='none'}">None</button>`;
+  h+=`<button class="chip" type="button" data-last="other" aria-pressed="${st.last==='other'}">Another farm</button>`;
+  $('lastChips').innerHTML=h;
+  $('lastOther').hidden=st.last!=='other';
+  $('daysWrap').hidden=st.last!=='other';
+  $('daysChips').innerHTML=DAYS.map(d=>`<button class="chip" type="button" data-days="${esc(d)}" aria-pressed="${st.days===d}">${esc(d==='Last 24 Hours'?'Last 24 hours':d)}</button>`).join('');
+}
+$('lastChips').addEventListener('click',e=>{const b=e.target.closest('[data-last]');if(!b)return;st.last=b.dataset.last;const sg=suggestion();if(st.last==='sg'&&sg){st.lastName=sg.name;st.days=sg.days}else if(st.last==='none'){st.lastName='None';st.days=''}else{st.lastName=$('lastName').value.trim();st.days=''}renderLast();update();if(st.last==='other')$('lastName').focus()});
+$('daysChips').addEventListener('click',e=>{const b=e.target.closest('[data-days]');if(!b)return;st.days=b.dataset.days;renderLast();update()});
+$('lastName').addEventListener('input',()=>{st.lastName=$('lastName').value.trim();update()});
+$('siteData').innerHTML=SITES.map(s=>`<option value="${esc(s)}">`).join('');
+
+/* Biosecurity */
+$('camSeg').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;st.cam=b.dataset.v;for(const c of $('camSeg').children)c.setAttribute('aria-pressed',c.dataset.v===st.cam);update()});
+const QS=[['id','Proof of ID provided'],['clothes','Changed into farm clothes or overalls'],['symptoms','Flu like symptoms, vomiting or diarrhoea'],['abroad','Abroad in the past 7 days'],['stock','Contact with other farmed livestock in the last 24 hours'],['rules','Read the farm Health and Safety Site Rules']];
+function renderDecl(){
+  const a=st.a;
+  $('decl').innerHTML=QS.map(([k,t])=>{let v=a[k];if(k==='abroad'&&v==='Yes')v=a.countries||'Yes';if(k==='stock'&&v==='Yes')v=a.species||'Yes';return`<li><span>${esc(t)}</span><span>${esc(v)}</span></li>`}).join('');
+  $('diffQs').innerHTML=QS.map(([k,t])=>`<div class="q"><p>${esc(t)}?</p><div class="seg">${['Yes','No'].map(v=>`<button class="chip" type="button" data-q="${k}" data-v="${v}" aria-pressed="${a[k]===v}">${v}</button>`).join('')}</div>${
+    k==='abroad'&&a.abroad==='Yes'?`<label class="f" for="countries">Countries visited</label><input type="text" id="countries" value="${esc(a.countries)}">`:''}${
+    k==='stock'&&a.stock==='Yes'?`<label class="f" for="species">Species</label><select id="species"><option value="">Choose</option>${SPECIES.map(s=>`<option${a.species===s?' selected':''}>${esc(s)}</option>`).join('')}</select><label class="f" for="loc">Where was the contact?</label><input type="text" id="loc" value="${esc(a.loc)}">`:''}</div>`).join('');
+}
+$('diffQs').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;st.a[b.dataset.q]=b.dataset.v;st.confirm=false;$('confirm').checked=false;renderDecl();update()});
+$('diffQs').addEventListener('input',e=>{if(['countries','loc','species'].includes(e.target.id)){st.a[e.target.id]=e.target.value;const li=$('decl');renderDeclList();update()}});
+function renderDeclList(){const a=st.a;$('decl').innerHTML=QS.map(([k,t])=>{let v=a[k];if(k==='abroad'&&v==='Yes')v=a.countries||'Yes';if(k==='stock'&&v==='Yes')v=a.species||'Yes';return`<li><span>${esc(t)}</span><span>${esc(v)}</span></li>`}).join('')}
+$('confirm').addEventListener('change',e=>{st.confirm=e.target.checked;update()});
+
+/* Build link */
+function problems(){
+  const m=$('meForm').hidden?store.me:readMe();const out=[];
+  if(!m||!m.name)out.push('your name');if(!m||!m.reg)out.push('your vehicle reg');if(!m||!m.phone)out.push('your mobile number');
+  if(!st.site)out.push('your farm');
+  if(!st.last||(st.last==='other'&&(!st.lastName||!st.days)))out.push('your last pig farm');
+  if(!st.cam)out.push('the camera question');
+  const a=st.a;if(a.abroad==='Yes'&&!a.countries.trim())out.push('the countries visited');
+  if(a.stock==='Yes'&&(!a.species||!a.loc.trim()))out.push('the livestock contact details');
+  if(!st.confirm)out.push('the confirmation tick');
+  return out;
+}
+function stops(){
+  const a=st.a,s=[];
+  if(a.symptoms==='Yes')s.push('Entry is not permitted with flu like symptoms, vomiting or diarrhoea.');
+  if(a.id==='No')s.push('Proof of ID is needed before entry.');
+  if(a.clothes==='No')s.push('Change into the clothes or overalls provided by the farm before entry.');
+  if(a.rules==='No')s.push('Read the farm Health and Safety Site Rules before entry.');
+  return s;
+}
+function answers(){
+  const m=$('meForm').hidden?store.me:readMe(),a=st.a,p=new URLSearchParams();
+  const add=(k,v)=>{if(v)p.append('entry.'+E[k],v)};
+  add('site',st.site);add('name',m.name);add('id',a.id);add('phone',m.phone);add('org',m.org);add('reg',m.reg);add('clothes',a.clothes);
+  add('cam',st.cam);if(st.cam==='Yes')add('camAuth','Yes');add('symptoms',a.symptoms);
+  add('last',st.lastName||'None');if(st.lastName&&st.lastName!=='None')add('days',st.days);
+  add('abroad',a.abroad==='Yes'?a.countries.trim():'No');add('stock',a.stock);
+  if(a.stock==='Yes'){add('species',a.species);add('loc',a.loc.trim())}
+  add('rules',a.rules);
+  return p.toString();
+}
+function update(){
+  const s=stops(),p=problems();
+  $('stop').hidden=!s.length;$('stop').innerHTML=s.map(esc).join('<br>')+(s.length?'<br>Speak to the farm manager.':'');
+  const ok=!s.length&&!p.length;
+  $('go').disabled=!ok;
+  if(ok){$('need').innerHTML='Sends straight to the visitor book. <a id="alt" target="_blank" rel="noopener" href="'+esc(FORM+'?usp=pp_url&'+answers())+'">Or open the Google form</a>'}
+  else $('need').textContent=s.length?'Entry not permitted on these answers':'Still needed: '+p.join(', ');
+}
+/* Sending: a direct post to the Google form. Google gives no readable reply to other sites,
+   so a network failure is the only failure we can see; those are queued and retried. */
+const POST=FORM.replace(/viewform$/,'formResponse');
+async function send(body){await fetch(POST,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})}
+let flushing=false;
+async function flush(){
+  if(flushing||!store.queue||!store.queue.length)return;flushing=true;
+  while(store.queue.length){try{await send(store.queue[0].body);store.queue.shift();save()}catch(e){break}}
+  flushing=false;renderQueue();
+}
+function renderQueue(){const q=store.queue||[];$('queued').hidden=!q.length;
+  $('queued').textContent=q.length?`No signal when you signed in at ${q.map(x=>x.site).join(', ')}. It is saved on this phone and will send automatically when you have signal and the app is open.`:''}
+$('go').addEventListener('click',async()=>{
+  if($('go').disabled)return;
+  if(!$('meForm').hidden){store.me=readMe();showMe()}
+  const body=answers(),site=st.site,t=Date.now();
+  $('go').disabled=true;$('go').textContent='Sending…';
+  let sent=true;try{await send(body)}catch(e){sent=false;(store.queue=store.queue||[]).push({body,site,t})}
+  store.log.push({site,t});store.log=store.log.slice(-30);save();
+  $('okTitle').textContent=sent?'Signed in':'Saved, will send';
+  $('okSite').textContent=site;
+  $('okWho').textContent=store.me.name+' · '+store.me.reg+' · '+new Date(t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  $('ok').hidden=false;$('go').textContent='Sign in';
+  renderHist();renderQueue();
+});
+$('okClose').onclick=()=>{$('ok').hidden=true;st.site='';st.last=null;st.lastName='';st.days='';st.cam='';st.a=Object.assign({},STD);st.confirm=false;$('confirm').checked=false;$('diff').open=false;
+  for(const c of $('camSeg').children)c.setAttribute('aria-pressed',false);try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}
+  renderSite();renderLast();renderDecl();update();window.scrollTo({top:0})};
+window.addEventListener('online',flush);
+function renderHist(){
+  const l=store.log.slice(-5).reverse();$('histCard').hidden=!l.length;
+  $('hist').innerHTML=l.map(x=>`<li>${esc(x.site)}, ${esc(new Date(x.t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</li>`).join('');
+}
+window.addEventListener('hashchange',()=>{siteFromHash();renderSite();update()});
+
+siteFromHash();showMe();renderSite();renderLast();renderDecl();renderHist();renderQueue();update();flush();
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+}
+</script>
+</body>
+</html>
